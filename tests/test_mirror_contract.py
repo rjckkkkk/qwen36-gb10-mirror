@@ -61,9 +61,9 @@ class MirrorWorkflowContractTest(unittest.TestCase):
         self.assertIn(EXPECTED_COSIGN_INSTALLER, self.workflow())
 
     def test_signing_uses_ghcr_legacy_referrers_mode(self) -> None:
-        self.assertGreaterEqual(
+        self.assertEqual(
             self.workflow().count("--registry-referrers-mode legacy"),
-            2,
+            1,
         )
 
 
