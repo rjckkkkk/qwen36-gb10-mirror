@@ -1,0 +1,75 @@
+name: Sign public Qwen3.6 GB10 mirror
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: sign-qwen36-gb10-mirror
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sign:
+    name: Verify and sign fixed digest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    env:
+      IMAGE_DIGEST: sha256:d4e9505469af37e7c65b83a8e9a6b3025173ab9836366443eacee2dbf0493ae7
+      IMAGE_REF: ghcr.io/rjckkkkk/qwen36-gb10@sha256:d4e9505469af37e7c65b83a8e9a6b3025173ab9836366443eacee2dbf0493ae7
+      COSIGN_IDENTITY: https://github.com/rjckkkkk/qwen36-gb10-mirror/.github/workflows/candidate.yml@refs/heads/main
+      COSIGN_ISSUER: https://token.actions.githubusercontent.com
+
+    steps:
+      - name: Verify immutable public mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$IMAGE_REF" = "ghcr.io/rjckkkkk/qwen36-gb10@$IMAGE_DIGEST"
+          docker manifest inspect "$IMAGE_REF" > manifest.json
+          jq -e '.schemaVersion == 2' manifest.json >/dev/null
+
+      - name: Log in to personal GHCR namespace
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install checksum-verified Cosign
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac
+        with:
+          cosign-release: v3.0.6
+
+      - name: Sign immutable mirror with GitHub OIDC
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign sign --yes \
+            --bundle cosign-bundle.json \
+            "$IMAGE_REF"
+
+      - name: Verify personal workflow identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign verify \
+            --certificate-identity "$COSIGN_IDENTITY" \
+            --certificate-oidc-issuer "$COSIGN_ISSUER" \
+            "$IMAGE_REF" \
+            > cosign-verification.json
+
+      - name: Upload Sigstore evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qwen36-gb10-mirror-signature-${{ github.run_id }}
+          path: |
+            cosign-bundle.json
+            cosign-verification.json
+          if-no-files-found: error
+          retention-days: 30
