@@ -54,7 +54,6 @@ jobs:
             --new-bundle-format=false \
             --registry-referrers-mode legacy \
             --use-signing-config=false \
-            --bundle cosign-bundle.json \
             "$IMAGE_REF"
 
       - name: Verify personal workflow identity
@@ -68,12 +67,20 @@ jobs:
             "$IMAGE_REF" \
             > cosign-verification.json
 
+      - name: Export attached signature evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign download signature "$IMAGE_REF" > cosign-signatures.json
+          jq -e 'type == "array" and length > 0' \
+            cosign-signatures.json >/dev/null
+
       - name: Upload Sigstore evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: qwen36-gb10-mirror-signature-${{ github.run_id }}
           path: |
-            cosign-bundle.json
+            cosign-signatures.json
             cosign-verification.json
           if-no-files-found: error
           retention-days: 30

@@ -60,6 +60,11 @@ class MirrorWorkflowContractTest(unittest.TestCase):
     def test_cosign_installer_supports_v3_release_assets(self) -> None:
         self.assertIn(EXPECTED_COSIGN_INSTALLER, self.workflow())
 
+    def test_workflow_exports_attached_signature_evidence(self) -> None:
+        text = self.workflow()
+        self.assertIn("cosign download signature", text)
+        self.assertIn("cosign-signatures.json", text)
+
     def test_signing_uses_ghcr_legacy_referrers_mode(self) -> None:
         self.assertEqual(
             self.workflow().count("--registry-referrers-mode legacy"),
