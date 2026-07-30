@@ -71,9 +71,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cosign download signature "$IMAGE_REF" > cosign-signatures.json
-          jq -e 'type == "array" and length > 0' \
-            cosign-signatures.json >/dev/null
+          cosign download signature "$IMAGE_REF" \
+            | jq -s -e 'type == "array" and length > 0' \
+            > cosign-signatures.json
 
       - name: Upload Sigstore evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

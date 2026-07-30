@@ -63,6 +63,7 @@ class MirrorWorkflowContractTest(unittest.TestCase):
     def test_workflow_exports_attached_signature_evidence(self) -> None:
         text = self.workflow()
         self.assertIn("cosign download signature", text)
+        self.assertIn("| jq -s -e", text)
         self.assertIn("cosign-signatures.json", text)
 
     def test_signing_uses_ghcr_legacy_referrers_mode(self) -> None:
