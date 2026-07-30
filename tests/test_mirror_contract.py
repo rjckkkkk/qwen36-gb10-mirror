@@ -15,6 +15,9 @@ EXPECTED_IDENTITY = (
     "https://github.com/rjckkkkk/qwen36-gb10-mirror/"
     ".github/workflows/candidate.yml@refs/heads/main"
 )
+EXPECTED_COSIGN_INSTALLER = (
+    "sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6"
+)
 
 
 class MirrorWorkflowContractTest(unittest.TestCase):
@@ -53,6 +56,9 @@ class MirrorWorkflowContractTest(unittest.TestCase):
         self.assertGreaterEqual(len(actions), 3)
         for action in actions:
             self.assertRegex(action, r"^[^@]+@[0-9a-f]{40}$")
+
+    def test_cosign_installer_supports_v3_release_assets(self) -> None:
+        self.assertIn(EXPECTED_COSIGN_INSTALLER, self.workflow())
 
 
 if __name__ == "__main__":
