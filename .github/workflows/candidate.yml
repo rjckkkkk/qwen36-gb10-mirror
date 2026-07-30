@@ -72,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           cosign download signature "$IMAGE_REF" \
-            | jq -s -e 'type == "array" and length > 0' \
+            | jq -s -e 'select(type == "array" and length > 0)' \
             > cosign-signatures.json
 
       - name: Upload Sigstore evidence
