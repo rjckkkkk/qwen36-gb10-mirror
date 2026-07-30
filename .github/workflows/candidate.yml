@@ -51,6 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           cosign sign --yes \
+            --registry-referrers-mode legacy \
             --bundle cosign-bundle.json \
             "$IMAGE_REF"
 
@@ -59,6 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           cosign verify \
+            --registry-referrers-mode legacy \
             --certificate-identity "$COSIGN_IDENTITY" \
             --certificate-oidc-issuer "$COSIGN_ISSUER" \
             "$IMAGE_REF" \
