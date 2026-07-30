@@ -65,6 +65,10 @@ class MirrorWorkflowContractTest(unittest.TestCase):
             self.workflow().count("--registry-referrers-mode legacy"),
             1,
         )
+        self.assertGreaterEqual(
+            self.workflow().count("--new-bundle-format=false"),
+            2,
+        )
 
 
 if __name__ == "__main__":
