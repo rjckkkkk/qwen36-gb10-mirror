@@ -69,6 +69,10 @@ class MirrorWorkflowContractTest(unittest.TestCase):
             self.workflow().count("--new-bundle-format=false"),
             2,
         )
+        self.assertEqual(
+            self.workflow().count("--use-signing-config=false"),
+            1,
+        )
 
 
 if __name__ == "__main__":

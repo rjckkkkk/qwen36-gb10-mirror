@@ -53,6 +53,7 @@ jobs:
           cosign sign --yes \
             --new-bundle-format=false \
             --registry-referrers-mode legacy \
+            --use-signing-config=false \
             --bundle cosign-bundle.json \
             "$IMAGE_REF"
 
